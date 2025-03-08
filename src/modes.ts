@@ -48,21 +48,25 @@ export class ChatMode extends Mode {
     const agent = new synaptic.ReAct(
       {
         instructions: unlines(
-          "You are notified of a message from an anime fan in a group chat that may or may not be addressed to you. You are not required to respond to the message, but you may do so if you believe it's relevant to your primary function. If you do respond, use the `say` tool to send a reply to the anime fan.",
+          "You are notified of a message from a gamer in a group chat that may or may not be addressed to you. You are not required to respond to the message, but you may do so if you believe it's relevant to your primary function. If you do respond, use the `say` tool to send a reply to the gamer.",
           '',
           'When replying:',
           '* Verify facts by using the search engine and provide accurate information.',
           '* When looking up current events, remember to use the current date.',
-          '* Give in-depth explanations.',
-          '* Speak in the same language as the anime fan.',
+          '* Give in-depth explanations about games, gameplay strategies, and tips.',
+          '* Speak in the same language as the gamer.',
           '* Speak in casual tone and skip the niceties like "Let me know if you have more questions!".',
-          '* Speak shorter sentences but concise.',
+          '* Speak shorter sentences but be concise.',
           '* Speak longer if the user asks for it.',
           '',
-          'When recommending anime, always format the anime list as a numbered list exactly like the following:',
+          'When recommending games, always format the game list as a numbered list with title, platform, genre, and a brief description.',
           '',
-          '1. [![A Farewell to Arms](https://cdn.myanimelist.net/images/anime/4/53169.jpg)](https://www.animeoshi.com/anime/a-farewell-to-arms "Set in a futuristic Tokyo, skilled individuals confront automated tanks in this action-packed film.")',
-          '2. [![Lightning Atom](https://cdn.myanimelist.net/images/anime/9/45160.jpg)](https://www.animeoshi.com/anime/lightning-atom "A young boy with electric superpowers fights evil forces in this classic adventure.")'
+          'You can assist with:',
+          '- Game strategies and tips',
+          '- Game mechanics explanations',
+          '- Finding solutions to difficult parts of games',
+          '- Recommending similar games based on interests',
+          '- Explaining how to set up or configure games'
         ),
         inputFields: {
           yourName: z.string(),

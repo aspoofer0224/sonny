@@ -1,15 +1,15 @@
-import base58 from "bs58";
-import { randomBytes } from "crypto";
-import express from "express";
-import asyncHandler from "express-async-handler";
-import { Redis } from "ioredis";
-import jwt from "jsonwebtoken";
-import { isNumber, isString } from "lodash";
-import WebSocket from "ws";
-import { ReplyMetadata } from "./agent";
-import { Task } from "./modes";
-import PubSub from "./pubsub";
-import TaskQueue from "./task-queue";
+import base58 from 'bs58';
+import { randomBytes } from 'crypto';
+import express from 'express';
+import asyncHandler from 'express-async-handler';
+import { Redis } from 'ioredis';
+import jwt from 'jsonwebtoken';
+import { isNumber, isString } from 'lodash';
+import WebSocket from 'ws';
+import { ReplyMetadata } from './agent';
+import { Task } from './modes';
+import PubSub from './pubsub';
+import TaskQueue from './task-queue';
 
 const MAX_TASK_COUNT = 100;
 
@@ -19,12 +19,12 @@ async function main(): Promise<void> {
 
   app.use(express.json());
 
-  app.get("/healthz", (_req, res) => {
-    res.status(200).type("txt").send("OK");
+  app.get('/healthz', (_req, res) => {
+    res.status(200).type('txt').send('OK');
   });
 
   app.post(
-    "/chats",
+    '/chats',
     asyncHandler(async (req, res) => {
       const size = await taskQueue.size();
       const maxAge = await taskQueue.maxAge();
@@ -33,8 +33,8 @@ async function main(): Promise<void> {
         res
           .status(429)
           .set(
-            "Retry-After",
-            isNumber(maxAge) ? Math.ceil(maxAge).toString() : "60"
+            'Retry-After',
+            isNumber(maxAge) ? Math.ceil(maxAge).toString() : '60'
           )
           .send({ queue_size: size });
 
@@ -43,7 +43,7 @@ async function main(): Promise<void> {
 
       const chatId = base58.encode(randomBytes(16));
 
-      res.type("txt").send(
+      res.type('txt').send(
         jwt.sign(
           {
             chat_id: chatId,
@@ -52,35 +52,35 @@ async function main(): Promise<void> {
             language: req.body.language,
           },
           process.env.JWT_SECRET!,
-          { algorithm: "HS256" }
+          { algorithm: 'HS256' }
         )
       );
     })
   );
 
   app.post(
-    "/messages",
+    '/messages',
     asyncHandler(async (req, res) => {
       const claims = jwt.verify(req.body.chat, process.env.JWT_SECRET!, {
-        algorithms: ["HS256"],
+        algorithms: ['HS256'],
       });
 
       if (isString(claims)) {
-        throw new Error("Invalid chat token");
+        throw new Error('Invalid chat token');
       }
 
       const replyId = claims.chat_id;
 
       await taskQueue.add(`self:${replyId}`, {
-        content: req.body.content ?? "",
+        content: req.body.content ?? '',
         metadata: {
           persona: claims.persona,
           trait: claims.trait,
           language: claims.language,
-          channel: req.body.channel ?? "",
+          channel: req.body.channel ?? '',
           replyId: replyId,
           history: req.body.history,
-          mode: "group-chat",
+          mode: 'group-chat',
           nsfw: req.body.nsfw,
         },
       });
@@ -89,21 +89,21 @@ async function main(): Promise<void> {
     })
   );
 
-  const httpServer = app.listen(8080, "0.0.0.0");
+  const httpServer = app.listen(8080, '0.0.0.0');
   const wsServer = new WebSocket.Server({
     server: httpServer,
-    path: "/replies",
+    path: '/replies',
   });
 
-  wsServer.on("connection", async (ws, req) => {
+  wsServer.on('connection', async (ws, req) => {
     try {
-      const chat = new URLSearchParams(req.url!.split("?")[1]).get("chat")!;
+      const chat = new URLSearchParams(req.url!.split('?')[1]).get('chat')!;
       const claims = jwt.verify(chat, process.env.JWT_SECRET!, {
-        algorithms: ["HS256"],
+        algorithms: ['HS256'],
       });
 
       if (isString(claims)) {
-        throw new Error("Invalid chat token");
+        throw new Error('Invalid chat token');
       }
 
       const replyId = claims.chat_id;
